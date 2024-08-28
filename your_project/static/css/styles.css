@@ -1,0 +1,83 @@
+/* Reset styles */
+body, h1, input, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Basic body styling */
+body {
+    background-color: #000000; /* Black background */
+    color: #c0c0c0; /* Light silver text */
+    font-family: 'Arial', sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Container for the UI */
+.container {
+    background-color: #1c1c1c; /* Dark gray for container */
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.7); /* Blue glowing shadow */
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Header styling */
+header h1 {
+    font-size: 28px;
+    color: #00bfff; /* Bright blue text */
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #00bfff; /* Blue glow */
+}
+
+/* Form container styling */
+.form-container {
+    margin-bottom: 20px;
+}
+
+/* Input field styling */
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #00bfff; /* Blue border */
+    border-radius: 8px;
+    background-color: #2b2b2b; /* Darker gray background */
+    color: #c0c0c0; /* Silver text */
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); /* Blue shadow */
+}
+
+/* Button styling */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #c0c0c0; /* Silver background */
+    color: #000000; /* Black text */
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 0 15px rgba(192, 192, 192, 0.5); /* Silver shadow */
+}
+
+button:hover {
+    background-color: #00bfff; /* Blue on hover */
+    color: #ffffff; /* White text on hover */
+    box-shadow: 0 0 20px #00bfff; /* Blue glow on hover */
+}
+
+/* Result area styling */
+#result {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #00bfff; /* Blue text for result */
+    text-shadow: 0 0 10px #00bfff; /* Blue glow */
+}
