@@ -2,8 +2,10 @@ import requests
 import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+from datetime import datetime  # Import for current date
 
 app = Flask(__name__)
 
@@ -23,9 +25,7 @@ def fetch_stock_data(symbol, api_key):
     response = requests.get(url)
     data = response.json()
 
-    # Debugging print statements
-    print(f"API Response: {data}")
-
+    # Check if the data is available
     if "Time Series (Daily)" in data:
         df = pd.DataFrame.from_dict(data["Time Series (Daily)"], orient='index', dtype='float')
         df = df.rename(columns={
@@ -39,8 +39,12 @@ def fetch_stock_data(symbol, api_key):
         df.sort_index(inplace=True)
         df = df.asfreq('B')  # Set frequency to business days
 
+        # Filter the data to include only the last 5 years
+        start_date = pd.Timestamp.today() - pd.DateOffset(years=5)
+        df = df[df.index >= start_date]
+
         # Debugging print to check data
-        print(f"Fetched Data for {symbol}:\n", df.head())
+        print(f"Fetched Data for {symbol} from {start_date.date()} to {df.index[-1].date()}:\n", df.head())
         return df
     else:
         print(f"Error fetching data: {data}")
@@ -109,35 +113,56 @@ def calculate_obv(df):
     obv = (np.sign(df['Close'].diff()) * df['Volume']).fillna(0).cumsum()
     return obv
 
-# Function to predict stock prices using a random forest model
+# Enhance features by adding more indicators
+def enhance_features(df):
+    # Example of additional features
+    df['SMA_50'] = df['Close'].rolling(window=50).mean()
+    df['EMA_100'] = df['Close'].ewm(span=100, adjust=False).mean()
+    df['ATR'] = df['High'] - df['Low']  # Simple example of an Average True Range
+    df['Volatility'] = df['Close'].rolling(window=50).std()  # Rolling volatility
+    
+    df.dropna(inplace=True)  # Drop NaN values
+    return df
+
+# Function to predict stock prices using a gradient boosting model
 def predict_future(df, days):
     df['Date'] = pd.to_datetime(df.index)
     df['Date'] = df['Date'].map(pd.Timestamp.toordinal)
+
+    # Enhance features
+    df = enhance_features(df)
 
     # Define feature columns and target
     feature_columns = [col for col in df.columns if col not in ['Open', 'High', 'Low', 'Volume', 'Close']]
     features = df[feature_columns]
     target = df['Close']
 
-    # Train a RandomForest model
-    model = RandomForestRegressor(n_estimators=100)
-    model.fit(features, target)
+    # Scale the features
+    scaler = StandardScaler()
+    features_scaled = scaler.fit_transform(features)
+
+    # Train a Gradient Boosting model with tuned hyperparameters
+    model = GradientBoostingRegressor(n_estimators=500, max_depth=4, learning_rate=0.01, random_state=42)
+    model.fit(features_scaled, target)
 
     # Predict the future
-    last_row = pd.DataFrame([df.iloc[-1][feature_columns].values], columns=feature_columns)
+    last_row = pd.DataFrame([features.iloc[-1].values], columns=feature_columns)
+    last_row_scaled = scaler.transform(last_row)
     predictions = []
 
     for i in range(1, days + 1):
         future_row = last_row.copy()
         future_row['Date'] += i  # Increment the date
-        pred = model.predict(future_row)
+        future_row_scaled = scaler.transform(future_row)
+        pred = model.predict(future_row_scaled)
         predictions.append(pred[0])
 
     return predictions
 
 # Function to generate a summary of the analysis
 def generate_summary(symbol, next_day, forecast_30, forecast_60, forecast_90, df):
-    summary = f"Stock Analysis for {symbol}:\n"
+    current_date = datetime.now().strftime("%Y-%m-%d")  # Get the current date
+    summary = f"Stock Analysis for {symbol} on {current_date}:\n"  # Include the date in the summary
     summary += f"Predicted price for the next day: ${next_day:.2f}\n"
     summary += f"Predicted price for 30 days: ${forecast_30[-1]:.2f}\n"
     summary += f"Predicted price for 60 days: ${forecast_60[-1]:.2f}\n"
