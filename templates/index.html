@@ -3,67 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Analysis Summary</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #C0C0C0;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            color: #00BFFF;
-            margin-top: 50px;
-        }
-        .content {
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #C0C0C0;
-            border-radius: 10px;
-            background-color: #333;
-            display: inline-block;
-        }
-        .chart {
-            margin-top: 20px;
-        }
-        .form-container {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            margin-right: 10px;
-        }
-        input[type="submit"] {
-            padding: 10px 20px;
-            background-color: #00BFFF;
-            border: none;
-            border-radius: 5px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #1E90FF;
-        }
-    </style>
+    <title>Stock Analysis</title>
 </head>
 <body>
     <h1>Stock Analysis Summary</h1>
-    <div class="content">
-        <div class="form-container">
-            <form method="POST">
-                <input type="text" name="symbol" placeholder="Enter stock symbol" required>
-                <input type="submit" value="Analyze">
-            </form>
-        </div>
-        <p>{{ summary }}</p>
-        <div class="chart">
-            <img src="{{ url_for('static', filename=symbol ~ '_chart_combination_' ~ combination ~ '.png') }}" alt="Stock Chart">
-        </div>
-    </div>
+    
+    <form method="post">
+        <label for="symbol">Enter stock symbol:</label>
+        <input type="text" id="symbol" name="symbol" value="{{ symbol }}">
+        <input type="submit" value="Analyze">
+    </form>
+    
+    <h2>Predictions for {{ symbol }}</h2>
+    <p>{{ summary }}</p>
+    
+    {% if chart_url %}
+        <img src="{{ url_for('static', filename=chart_url) }}" alt="Stock Chart">
+    {% else %}
+        <p>No chart available.</p>
+    {% endif %}
 </body>
 </html>
